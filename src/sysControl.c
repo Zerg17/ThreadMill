@@ -1,5 +1,6 @@
 #include "sysControl.h"
 #include "system.h"
+#include "key.h"
 
 uint32_t volatile tick=0;
 uint32_t sec_d=0;
@@ -12,4 +13,6 @@ void SysTick_Handler(void) {
         sec++;
     }
     if(tick == 0xFFFFFFFF) NVIC_SystemReset();
+
+    keyProc();
 }

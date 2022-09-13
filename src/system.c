@@ -1,5 +1,6 @@
 #include "system.h"
 #include "display.h"
+#include "modbus.h"
 
 void rccInit(){
     RCC->AHBENR |= RCC_AHBENR_GPIOFEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOAEN | RCC_AHBENR_DMAEN;
@@ -104,18 +105,21 @@ void i2c2Init(){
     I2C2->CR1 = I2C_CR1_PE;
 }
 
+void nvicInit(){
+    NVIC_EnableIRQ(USART1_IRQn);
+    NVIC_SetPriority(SysTick_IRQn, 3);
+    SysTick_Config(F_CPU/100);
+}
+
 void sysInit(){
     rccInit();
     gpioInit();
     uart2Init();
+    xdev_out(uart2Write);
     tim17Init();
     spi1Init();
     i2c2Init();
-
-    xdev_out(uart2Write);
-
-    NVIC_SetPriority(SysTick_IRQn, 3);
-    SysTick_Config(F_CPU/100);
-
+    mbInit();
+    nvicInit();
     lcdInit();
 }
