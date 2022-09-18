@@ -46,6 +46,10 @@ void gpioInit(){
     // 1 - Alternate function
     // Msk - Analog mode
 
+    GPIOA->PUPDR|=GPIO_PUPDR_PUPDR10_0;
+    GPIOB->PUPDR|=GPIO_PUPDR_PUPDR2_0;
+    
+
     GPIOA->MODER 
         |= GPIO_MODER_MODER12_1 
         | GPIO_MODER_MODER10_1 

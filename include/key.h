@@ -17,6 +17,6 @@ typedef struct{
     uint8_t isLongClick:1;
 } key_t;
 
-extern key_t key[KEY_NUM];
+extern volatile key_t key[KEY_NUM];
 
 void keyProc(void);

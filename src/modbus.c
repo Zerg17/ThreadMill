@@ -4,17 +4,6 @@
 #define CRC_INIT 0xFFFF
 #define CRC_POLY 0xA001 // Reversed 0x8005
 
-/// @brief Шаги конечного автомата для приема
-typedef enum{
-    entry,
-    getCmd,
-    getLen,
-    get4Bytes,
-    get4BytesThenLen,
-    checkCRCh,
-    checkCRCl
-} mbStep;
-
 mbRX_t mbRX;
 
 void mbInit(void){
@@ -25,7 +14,7 @@ void mbInit(void){
     USART1->RTOR = 80;
     USART1->CR3|=USART_CR3_DEM|USART_CR3_DMAT|USART_CR3_EIE;
     USART1->CR2|=USART_CR2_RTOEN;
-    USART1->CR1|=USART_CR1_RTOIE|USART_CR1_DEAT_Msk|USART_CR1_DEDT_Msk|USART_CR1_RXNEIE|USART_CR1_TE|USART_CR1_RE|USART_CR1_UE;
+    USART1->CR1|=USART_CR1_RTOIE|USART_CR1_DEAT_Msk|USART_CR1_DEDT_Msk|USART_CR1_M|USART_CR1_PCE|USART_CR1_RXNEIE|USART_CR1_TE|USART_CR1_RE|USART_CR1_UE;
 }
 
 void mbTX(uint8_t* d, uint16_t l){

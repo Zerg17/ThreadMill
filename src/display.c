@@ -23,6 +23,10 @@ void lcdWriteByte(uint8_t d, uint8_t m){
 }
 
 void lcdSetPos(uint8_t x, uint8_t y){
+    if(y>2){
+        x+=20;
+        y-=20;
+    }
 	lcdWriteByte((0x40*y+x)|0b10000000, 0);
 }
 

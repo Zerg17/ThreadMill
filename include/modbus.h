@@ -2,8 +2,19 @@
 
 #include "stdint.h"
 
-#define MB_BAUD 38400
+#define MB_BAUD 19200
 #define RX_BUF 263
+
+/// @brief Шаги конечного автомата для приема
+typedef enum{
+    entry,
+    getCmd,
+    getLen,
+    get4Bytes,
+    get4BytesThenLen,
+    checkCRCh,
+    checkCRCl
+} mbStep;
 
 #pragma pack(push, 1)
 
