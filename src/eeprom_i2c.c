@@ -2,7 +2,7 @@
 
 #define M24C01_ADR 0XA0
 
-uint8_t eepromRead(uint16_t adr, uint8_t *dst, uint16_t len){
+uint8_t eepromRead(uint16_t adr, uint8_t* dst, uint16_t len){
     if((I2C2->ISR & I2C_ISR_BUSY)) return 1; else{
         uint8_t* adrA = (uint8_t*)(&adr);
         I2C2->CR2 = (2 << I2C_CR2_NBYTES_Pos) | I2C_CR2_START | M24C01_ADR;

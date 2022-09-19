@@ -18,14 +18,15 @@ void mbInit(void){
 }
 
 void mbTX(uint8_t* d, uint16_t l){
+    mbRX.rxne=0;
     uint16_t crc = CRC_INIT;
     for(uint16_t i=0; i<l; i++){
         crc ^= d[i];
-        for(uint8_t i=0; i<8; i++)
-        if(crc & 1){
-            crc >>= 1;
-            crc ^= CRC_POLY;
-        }else crc >>= 1;
+        for(uint8_t j=0; j<8; j++)
+            if(crc & 1){
+                crc >>= 1;
+                crc ^= CRC_POLY;
+            }else crc >>= 1;
     }
     d[l]=crc;
     d[l+1]=crc>>8;

@@ -16,66 +16,82 @@ typedef enum{
     checkCRCl
 } mbStep;
 
+typedef enum{
+    readCoils=1,
+    readDiscreteInputs,
+    readHoldingRegisters,
+    readInputRegisters,
+    writeSingleCoil,
+    writeSingleRegister,
+    writeMultipleCoils=0x0F,
+    writeMultipleRegisters
+} mbFunction;
+
 #pragma pack(push, 1)
 
 typedef struct {
-  uint8_t adr;
-  uint8_t code;
-  uint16_t regAdr;
-  uint16_t regCnt;
+    uint8_t adr;
+    uint8_t code;
+} mbHead_t;
+
+typedef struct {
+    uint8_t adr;
+    uint8_t code;
+    uint16_t regAdr;
+    uint16_t regCnt;
 } mbRequest_03_04_t;
 
 typedef struct {
-  uint8_t adr;
-  uint8_t code;
-  uint16_t regAdr;
-  uint16_t regData;
+    uint8_t adr;
+    uint8_t code;
+    uint16_t regAdr;
+    uint16_t regData;
 } mbRequest_06_t;
 
 typedef struct {
-  uint8_t adr;
-  uint8_t code;
-  uint16_t regAdr;
-  uint16_t regCnt;
-  uint8_t dataLen;
-  uint16_t regData[127];
+    uint8_t adr;
+    uint8_t code;
+    uint16_t regAdr;
+    uint16_t regCnt;
+    uint8_t dataLen;
+    uint16_t regData[127];
 } mbRequest_10_t;
 
 typedef struct {
-  uint8_t adr;
-  uint8_t code;
-  uint8_t dataLen;
-  uint16_t regData[127];
+    uint8_t adr;
+    uint8_t code;
+    uint8_t dataLen;
+    uint16_t regData[127];
 } mbResponse_03_04_t;
 
 typedef struct {
-  uint8_t adr;
-  uint8_t code;
-  uint16_t regAdr;
-  uint16_t regData;
+    uint8_t adr;
+    uint8_t code;
+    uint16_t regAdr;
+    uint16_t regData;
 } mbResponse_06_t;
 
 typedef struct {
-  uint8_t adr;
-  uint8_t code;
-  uint16_t regAdr;
-  uint16_t regCnt;
+    uint8_t adr;
+    uint8_t code;
+    uint16_t regAdr;
+    uint16_t regCnt;
 } mbResponse_10_t;
 
 typedef struct {
-  uint8_t adr;
-  uint8_t code;
-  uint8_t err;
+    uint8_t adr;
+    uint8_t code;
+    uint8_t err;
 } mbResponse_err_t;
 
 /// @brief Контекст приема MODBUS
 typedef struct {
-  uint16_t crc;
-  uint16_t ptr;
-  mbStep step;
-  uint8_t cnt;
-  volatile uint8_t rxne;
-  uint8_t buf[RX_BUF];
+    uint16_t crc;
+    uint16_t ptr;
+    mbStep step;
+    uint8_t cnt;
+    volatile uint8_t rxne;
+    uint8_t buf[RX_BUF];
 } mbRX_t;
 
 #pragma pack(pop)
