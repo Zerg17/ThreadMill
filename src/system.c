@@ -1,14 +1,15 @@
 #include "system.h"
+
 #include "display.h"
 #include "modbus.h"
 
-void rccInit(){
+void rccInit() {
     RCC->AHBENR |= RCC_AHBENR_GPIOFEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOAEN | RCC_AHBENR_DMAEN;
-    RCC->APB2ENR |= RCC_APB2ENR_TIM17EN | RCC_APB2ENR_TIM16EN | RCC_APB2ENR_USART1EN | RCC_APB2ENR_SPI1EN | RCC_APB1ENR_SPI2EN;
+    RCC->APB2ENR |= RCC_APB2ENR_TIM17EN | RCC_APB2ENR_TIM16EN | RCC_APB2ENR_USART1EN | RCC_APB2ENR_SPI1EN | RCC_APB1ENR_SPI2EN | RCC_APB2ENR_SYSCFGEN;
     RCC->APB1ENR |= RCC_APB1ENR_I2C2EN | RCC_APB1ENR_USART2EN | RCC_APB1ENR_SPI2EN;
 }
 
-void gpioInit(){
+void gpioInit() {
     // PA15 - KEY7              - GPIO_IN
     // PA12 - RS485_REDE        - USART1_RTS
     // PA11 - KEY10             - GPIO_IN
@@ -46,48 +47,32 @@ void gpioInit(){
     // 1 - Alternate function
     // Msk - Analog mode
 
-    GPIOA->PUPDR|=GPIO_PUPDR_PUPDR10_0;
-    GPIOB->PUPDR|=GPIO_PUPDR_PUPDR2_0;
-    
+    GPIOA->PUPDR |= GPIO_PUPDR_PUPDR10_0;
+    GPIOB->PUPDR |= GPIO_PUPDR_PUPDR2_0;
 
-    GPIOA->MODER 
-        |= GPIO_MODER_MODER12_1 
-        | GPIO_MODER_MODER10_1 
-        | GPIO_MODER_MODER9_1  
-        | GPIO_MODER_MODER3_1 
-        | GPIO_MODER_MODER2_1;
-    GPIOB->MODER 
-        |= GPIO_MODER_MODER15_1 
-        | GPIO_MODER_MODER14_0 
-        | GPIO_MODER_MODER13_1 
-        | GPIO_MODER_MODER12_0 
-        | GPIO_MODER_MODER11_1 
-        | GPIO_MODER_MODER10_1 
-        | GPIO_MODER_MODER9_1 
-        | GPIO_MODER_MODER8_0 
-        | GPIO_MODER_MODER5_1 
-        | GPIO_MODER_MODER4_0 
-        | GPIO_MODER_MODER3_1;
-    GPIOA->AFR[1]|= 0x00010110;
-    GPIOA->AFR[0]|= 0x00001100;
-    GPIOB->AFR[1]|= 0x00001122;
-    GPIOB->AFR[0]|= 0x11000000;
+    GPIOA->MODER |= GPIO_MODER_MODER12_1 | GPIO_MODER_MODER10_1 | GPIO_MODER_MODER9_1 | GPIO_MODER_MODER3_1 | GPIO_MODER_MODER2_1;
+    GPIOB->MODER |= GPIO_MODER_MODER15_1 | GPIO_MODER_MODER14_0 | GPIO_MODER_MODER13_1 | GPIO_MODER_MODER12_0 | GPIO_MODER_MODER11_1 | GPIO_MODER_MODER10_1 | GPIO_MODER_MODER9_1 | GPIO_MODER_MODER8_0 | GPIO_MODER_MODER5_1 | GPIO_MODER_MODER4_0 | GPIO_MODER_MODER3_1;
+    GPIOA->AFR[1] |= 0x00010110;
+    GPIOA->AFR[0] |= 0x00001100;
+    GPIOB->AFR[1] |= 0x00001122;
+    GPIOB->AFR[0] |= 0x11000000;
 
     // GPIOB->ODR |= GPIO_ODR_8;
 }
 
-void uart2Write(uint8_t d){
-    while(!(USART2->ISR & USART_ISR_TXE));
-    USART2->TDR=d;
+void uart2Write(uint8_t d) {
+    while (!(USART2->ISR & USART_ISR_TXE))
+        ;
+    USART2->TDR = d;
 }
 
-void uart2Init(){
-    USART2->BRR = F_CPU/BAUD2;
-    USART2->CR1 = USART_CR1_TE;
+void uart2Init() {
+    USART2->BRR = F_CPU / BAUD2;
+    USART2->CR1 = USART_CR1_TE | USART_CR1_RXNEIE | USART_CR1_RE;
     USART2->CR1 |= USART_CR1_UE;
 }
 
-void tim17Init(){
+void tim17Init() {
     TIM17->CCMR1 = (0x06 << TIM_CCMR1_OC1M_Pos);
     TIM17->CCER = TIM_CCER_CC1E;
     TIM17->BDTR |= TIM_BDTR_MOE;
@@ -95,27 +80,41 @@ void tim17Init(){
     TIM17->CR1 = TIM_CR1_ARPE | TIM_CR1_CEN;
 }
 
-void tim17pwm(uint16_t p, uint16_t a){
+void tim17pwm(uint16_t p, uint16_t a) {
     TIM17->ARR = a;
     TIM17->CCR1 = p;
 }
 
-void spi1Init(void){
+void spi1Init(void) {
     SPI1->CR1 = SPI_CR1_BIDIMODE | SPI_CR1_BIDIOE | SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR | SPI_CR1_SPE;
 }
 
-void i2c2Init(){
+void spi2Init(void) {
+    SPI2->CR1 = SPI_CR1_BIDIMODE | SPI_CR1_BIDIOE | SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR | SPI_CR1_SPE;
+}
+
+void i2c2Init() {
     I2C2->TIMINGR = 0x00310309;
     I2C2->CR1 = I2C_CR1_PE;
 }
 
-void nvicInit(){
-    NVIC_EnableIRQ(USART1_IRQn);
-    NVIC_SetPriority(SysTick_IRQn, 3);
-    SysTick_Config(F_CPU/100);
+void extiInit(){
+    SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI1_PB | SYSCFG_EXTICR1_EXTI0_PB;
+    EXTI->RTSR = (1<<1) | (1<<0);
+    EXTI->FTSR = (1<<1) | (1<<0);
+    EXTI->IMR =  (1<<1) | (1<<0);
+    NVIC_SetPriority(EXTI0_1_IRQn, 1);
+    NVIC_EnableIRQ(EXTI0_1_IRQn);
 }
 
-void sysInit(){
+void nvicInit() {
+    NVIC_EnableIRQ(USART1_IRQn);
+    NVIC_EnableIRQ(USART2_IRQn);
+    NVIC_SetPriority(SysTick_IRQn, 3);
+    SysTick_Config(F_CPU / 100);
+}
+
+void sysInit() {
     rccInit();
     gpioInit();
     uart2Init();
@@ -126,4 +125,6 @@ void sysInit(){
     mbInit();
     nvicInit();
     lcdInit();
+    spi2Init();
+    extiInit();
 }
