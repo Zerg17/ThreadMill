@@ -1,0 +1,112 @@
+Layouts of demonstration menu
+
+Requered setting:
+• Thread dia (Torque)
+• Speed
+• Pitch      
+• Depth
+
+Legend:
+  ○  Button Backlit off
+  ●  Button Backlit on
+  ◒  Button Backlit Blink
+ >○< Button Pressed
+
+Demonstration sequence
+
+        ●      ○      ●
+    ┌────────────────────┐
+    │  Dia         Pitch │
+ ○  │ M3 32Ncm     1.5mm │  ╭─╮
+    │ 60 rpm       10 mm │  ╰─╯
+    │ Speed        Depth │
+    └────────────────────┘
+        ●      ○      ●
+       >●<     ○      ●
+    ┌────────────────────┐
+    │  Dia         Pitch │
+ ○  │ M3 32Ncm     1.5mm │  ╭─╮
+    │ 60 rpm       10 mm │  ╰─╯
+    │ Speed        Depth │
+    └────────────────────┘
+        ●      ○      ●
+        ◒      ○      ●
+    ┌────────────────────┐
+    │  Dia         Pitch │
+ ○  │>M3 32Ncm<    1.5mm │  ╭─╮⤵ x1
+    │ 60 rpm       10 mm │  ╰─╯
+    │ Speed        Depth │
+    └────────────────────┘
+        ●      ○      ●
+       >◒<     ○      ●
+    ┌────────────────────┐
+    │  Dia         Pitch │
+ ○  │>M4 63Ncm<    1.5mm │  ╭─╮
+    │ 60 rpm       10 mm │  ╰─╯
+    │ Speed        Depth │
+    └────────────────────┘
+        ●      ○      ●
+        ●      ○      ●
+    ┌────────────────────┐
+    │  Dia         Pitch │
+>○< │>M4 63Ncm<    1.5mm │  ╭─╮
+    │ 60 rpm       10 mm │  ╰─╯
+    │ Speed        Depth │
+    └────────────────────┘
+        ●      ○      ●
+        ○      ○      ○
+    ┌────────────────────┐
+    │                    │
+>●< │       Ready        │  ╭─╮
+    │Press again to start│  ╰─╯
+    │                    │
+    └────────────────────┘
+        ○      ○      ○
+        ○      ○      ○
+    ┌────────────────────┐
+    │ Lower tap to start │          |  x
+ ◒  │<stop               │  ╭─╮     |   
+    │ 60 rpm 0 Ncm  0 mm │  ╰─╯     v   
+    │ Speed Torque Depth │       ──┐ ┌──
+    └────────────────────┘         │ │        
+        ○      ○      ○            └─┘  
+        ○      ○      ○                                  ○      ○      ○                 
+    ┌────────────────────┐                           ┌────────────────────┐              
+    │     Tapping...     │                           │     Tapping...     │              
+ ◒  │<stop               │  ╭─╮     |  ▼         >◒< │<stop               │  ╭─╮     |  ▼
+    │40 rpm 30 Ncm 2 mm  │  ╰─╯     |                │40 rpm 30 Ncm 2 mm  │  ╰─╯     |   
+    │ Speed Torque Depth │       ──┐v┌──             │ Speed Torque Depth │       ──┐v┌──
+    └────────────────────┘         │ │               └────────────────────┘         │ │  
+        ○      ○      ○            └─┘                   ○      ○      ○            └─┘  
+        ○      ○      ○                                  ○      ○      ○                 
+    ┌────────────────────┐                           ┌────────────────────┐              
+    │     Tapping...     │                           │      Abort...      │              
+ ◒  │<stop               │  ╭─╮        ▼          ◒  │                    │  ╭─╮     |  ▲
+    │40 rpm 30 Ncm 10 mm │  ╰─╯     |                │-10rpm 10 Ncm 2 mm  │  ╰─╯     |   
+    │ Speed Torque Depth │       ──┐|┌──             │ Speed Torque Depth │       ──┐v┌──
+    └────────────────────┘         │v│               └────────────────────┘         │ │  
+        ○      ○      ○            └─┘                   ○      ○      ○            └─┘  
+        ○      ○      ○                                 >◒<     ○      ●
+    ┌────────────────────┐                           ┌────────────────────┐          |  x
+    │     Tapping...     │                           │  Dia         Pitch │          |     
+ ◒  │                    │  ╭─╮        ▼          ○  │>M4 63Ncm<    1.5mm │  ╭─╮     v     
+    │40 rpm 30 Ncm 10 mm │  ╰─╯     |                │ 60 rpm       10 mm │  ╰─╯  ──┐ ┌──  
+    │ Speed Torque Depth │       ──┐|┌──             │ Speed        Depth │         │ │    
+    └────────────────────┘         │v│               └────────────────────┘         └─┘   
+        ○      ○      ○            └─┘                   ●      ○      ●
+        ○      ○      ○
+    ┌────────────────────┐
+    │ Tapping completed! │
+ ◒  │                    │  ╭─╮     |  ▲
+    │-10rpm 10 Ncm 2 mm  │  ╰─╯     |
+    │ Speed Torque Depth │       ──┐v┌──
+    └────────────────────┘         │ │
+        ○      ○      ○            └─┘
+        ●      ○      ●
+    ┌────────────────────┐
+    │  Dia         Pitch │
+>○< │>M4 63Ncm<    1.5mm │  ╭─╮
+    │ 60 rpm       10 mm │  ╰─╯
+    │ Speed        Depth │
+    └────────────────────┘
+        ●      ○      ●
