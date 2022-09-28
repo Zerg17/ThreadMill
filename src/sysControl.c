@@ -15,4 +15,5 @@ void SysTick_Handler(void) {
     if(tick == 0xFFFFFFFF) NVIC_SystemReset();
 
     keyProc();
+    keyBklProc();
 }

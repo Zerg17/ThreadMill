@@ -1,4 +1,5 @@
 #include "key.h"
+#include "sysControl.h"
 
 static const struct {
     GPIO_TypeDef* port;
@@ -40,54 +41,34 @@ volatile int32_t encPos;
 volatile uint8_t debounce;
 
 void EXTI0_1_IRQHandler() {
-    // static int32_t ept;
-    // uint8_t A = ((GPIOB->IDR) & (1 << 0)) != 0;
-    // uint8_t B = ((GPIOB->IDR) & (1 << 1)) != 0;
-    // if (EXTI->PR & EXTI_PR_PR0) {
-    //     EXTI->PR = EXTI_PR_PR0;
-    //     ept += A != B ? 1 : -1;
-    // }
-    // if (EXTI->PR & EXTI_PR_PR1) {
-    //     EXTI->PR = EXTI_PR_PR1;
-    //     //ept += A == B ? 1 : -1;
-    // }
-    // encPos=ept/2;
     uint8_t A = ((GPIOB->IDR) & (1 << 0)) != 0;
     uint8_t B = ((GPIOB->IDR) & (1 << 1)) != 0;
-
     if (EXTI->PR & EXTI_PR_PR0) {
         EXTI->PR = EXTI_PR_PR0;
-        if (!debounce) {
-            encPos++;
-            debounce = 1;
-        } else if ((A == 1) && (B == 1))
-            debounce = 0;
-    }
-
-    if (EXTI->PR & EXTI_PR_PR1) {
-        EXTI->PR = EXTI_PR_PR1;
-        if (!debounce) {
-            encPos--;
-            debounce = 1;
-        } else if ((A == 1) && (B == 1))
-            debounce = 0;
+        encPos += A != B ? 1 : -1;
     }
 }
 
-// 00 01 11 10
-// 00 10 11 01
-
-uint16_t muxState = 0;
+uint32_t keyBklStat;
 
 void keyBklSet(uint8_t key, uint8_t state) {
-    // *(uint8_t*)&(SPI1->DR) = d;
-    // while ((SPI1->SR & SPI_SR_BSY))
-    //     ;
-    // GPIOB->BSRR = GPIO_BSRR_BS_4;
-    // for (volatile uint32_t i = 0; i < 10; i++)
-    //     ;
-    // GPIOB->BSRR = GPIO_BSRR_BR_4;
+    keyBklStat=
+        (keyBklStat&(~(0b11<<(key*2))))|((state&0b11)<<(key*2));
 }
 
-void keyBklSetAll(uint8_t state) {
+void keyBklProc(){
+    uint16_t d=0;
+    for(uint8_t i=0; i<16; i++){ 
+        uint8_t m = keyBklStat>>i*2&0b11;
+        switch(m){
+            case 1: d|=1<<i; break;
+            case 2: d|=(tick/40%2)<<i; break;
+            case 3: d|=(tick/20%2)<<i; break;
+        }
+    }
+    SPI2->DR = d;
+    while ((SPI2->SR & SPI_SR_BSY));
+    GPIOB->BSRR = GPIO_BSRR_BS_14;
+    for (volatile uint32_t i = 0; i < 10; i++);
+    GPIOB->BSRR = GPIO_BSRR_BR_14;
 }

@@ -28,7 +28,7 @@ void lcdSetPos(uint8_t x, uint8_t y) {
         x += 20;
         y -= 2;
     }
-    lcdWriteByte((0x40 * y + x) | 0b10000000, 0);
+    lcdWriteByte(((y<<6) + x) | 0b10000000, 0);
 }
 
 const char win12512disp[] = {
@@ -45,6 +45,7 @@ void lcdChar(unsigned char c) {
 
 void lcdClear() {
     lcdWriteByte(0b00000001, 0);
+    for(volatile uint32_t i=0; i<100; i++);
 }
 
 void lcdInit() {

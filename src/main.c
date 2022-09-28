@@ -4,6 +4,7 @@
 #include "servo.h"
 #include "sysControl.h"
 #include "system.h"
+#include "key.h"
 // #include "modbus.h"
 
 uint32_t tim1 = 0, menuTim = 0;
@@ -23,7 +24,6 @@ void printHexTable(uint8_t* buf, uint32_t s) {
 uint8_t pos = 0;
 int main(void) {
     sysInit();
-    lcdClear();
     while (1) {
         // if (tim1 <= tick) {
         //     tim1 += 2;
@@ -34,27 +34,21 @@ int main(void) {
         //     else
         //         xprintf("%d\n", regs[0] | (regs[1] << 16));
         // }
-        if (tim1 <= tick) {
-            tim1 += 2;
-            // xprintf("pos: %d button: %s %d\n", encPos, key[0].isPressed ? "Pressed" : "Released");
-            if (encPos > 0) {
-                encPos = 0;
-                lcdSetPos(0, pos);
-                xfprintf(lcdChar, "            ");
-                pos = (pos + 1) & 0b11;
-                lcdSetPos(0, pos);
-                xfprintf(lcdChar, "Привет, мир!");
-                lcdChar(pos + '0');
-            } else if (encPos < 0) {
-                encPos = 0;
-                lcdSetPos(0, pos);
-                xfprintf(lcdChar, "            ");
-                pos = (pos - 1) & 0b11;
-                lcdSetPos(0, pos);
-                xfprintf(lcdChar, "Привет, мир!");
-                lcdChar(pos + '0');
-            }
-        }
+        // if (tim1 <= tick) {
+        //     tim1 += 2;
+        //     xprintf("pos: %d button: %s %d\n", encPos, key[0].isPressed ? "Pressed" : "Released");
+
+        //     lcdSetPos(0, (encPos +-1)%4);
+        //     xfprintf(lcdChar, "            ");
+        //     lcdSetPos(0, (encPos + 1)%4);
+        //     xfprintf(lcdChar, "            ");
+        //     lcdSetPos(0, encPos%4);
+        //     xfprintf(lcdChar, "Hello, World!");
+        //     lcdChar(pos + '0');
+
+        // }
+
+        // if(tick>=500) NVIC_SystemReset();
 
         // if(tim1<=tick){
         //     tim1+=2;
@@ -72,10 +66,11 @@ int main(void) {
         //     xprintf("%d\n", pos);
         //     // printHexTable(mbRX.buf, 7);
         // }
-        // if(menuTim<=tick){
-        //     menuTim+=10;
-        //     procMenu();
-        // }
+        
+        if(menuTim<=tick){
+            menuTim+=10;
+            procMenu();
+        }
     }
 }
 

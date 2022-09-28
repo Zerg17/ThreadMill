@@ -90,6 +90,7 @@ void spi1Init(void) {
 }
 
 void spi2Init(void) {
+    SPI2->CR2=SPI_CR2_DS_Msk;
     SPI2->CR1 = SPI_CR1_BIDIMODE | SPI_CR1_BIDIOE | SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR | SPI_CR1_SPE;
 }
 
@@ -100,9 +101,8 @@ void i2c2Init() {
 
 void extiInit(){
     SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI1_PB | SYSCFG_EXTICR1_EXTI0_PB;
-    EXTI->RTSR = (1<<1) | (1<<0);
-    EXTI->FTSR = (1<<1) | (1<<0);
-    EXTI->IMR =  (1<<1) | (1<<0);
+    EXTI->RTSR = (1<<0);
+    EXTI->IMR =  (1<<0);
     NVIC_SetPriority(EXTI0_1_IRQn, 1);
     NVIC_EnableIRQ(EXTI0_1_IRQn);
 }

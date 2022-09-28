@@ -38,3 +38,5 @@ extern volatile key_t key[KEY_NUM];
 extern volatile int32_t encPos;
 
 void keyProc(void);
+void keyBklSet(uint8_t key, uint8_t state);
+void keyBklProc(void);
