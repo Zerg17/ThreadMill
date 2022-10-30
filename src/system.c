@@ -6,7 +6,8 @@
 void rccInit() {
     RCC->AHBENR |= RCC_AHBENR_GPIOFEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOAEN | RCC_AHBENR_DMAEN;
     RCC->APB2ENR |= RCC_APB2ENR_TIM17EN | RCC_APB2ENR_TIM16EN | RCC_APB2ENR_USART1EN | RCC_APB2ENR_SPI1EN | RCC_APB1ENR_SPI2EN | RCC_APB2ENR_SYSCFGEN;
-    RCC->APB1ENR |= RCC_APB1ENR_I2C2EN | RCC_APB1ENR_USART2EN | RCC_APB1ENR_SPI2EN;
+    RCC->APB1ENR |= RCC_APB1ENR_I2C2EN | RCC_APB1ENR_USART2EN | RCC_APB1ENR_SPI2EN | RCC_APB1ENR_TIM14EN;
+    
 }
 
 void gpioInit() {
@@ -85,6 +86,12 @@ void tim17pwm(uint16_t p, uint16_t a) {
     TIM17->CCR1 = p;
 }
 
+void tim14Init() {
+    TIM14->ARR = F_CPU/10000-1;
+    TIM14->CR1 |= TIM_CR1_CEN;
+    TIM14->DIER |= TIM_DIER_UIE;
+}
+
 void spi1Init(void) {
     SPI1->CR1 = SPI_CR1_BIDIMODE | SPI_CR1_BIDIOE | SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR | SPI_CR1_SPE;
 }
@@ -110,8 +117,9 @@ void extiInit(){
 void nvicInit() {
     NVIC_EnableIRQ(USART1_IRQn);
     NVIC_EnableIRQ(USART2_IRQn);
+    NVIC_EnableIRQ(TIM14_IRQn);
     NVIC_SetPriority(SysTick_IRQn, 3);
-    SysTick_Config(F_CPU / 100);
+    SysTick_Config(F_CPU/100-1);
 }
 
 void sysInit() {
@@ -120,11 +128,12 @@ void sysInit() {
     uart2Init();
     xdev_out(uart2Write);
     tim17Init();
+    tim14Init();
     spi1Init();
     i2c2Init();
     mbInit();
     nvicInit();
     lcdInit();
     spi2Init();
-    extiInit();
+    // extiInit();
 }

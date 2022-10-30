@@ -1,6 +1,8 @@
 #include "key.h"
 #include "sysControl.h"
 
+#define ENC_INVERT
+
 static const struct {
     GPIO_TypeDef* port;
     uint16_t pin;
@@ -37,15 +39,62 @@ void keyProc(void) {
     }
 }
 
-volatile int32_t encPos;
-volatile uint8_t debounce;
+void TIM14_IRQHandler() {
+    TIM14->SR = 0; 
 
-void EXTI0_1_IRQHandler() {
+    static uint8_t lastA, lastB, tmpA, tmpB, cntA, cntB, valA, valB;
+    uint8_t A = ((GPIOB->IDR) & (1 << 0)) != 0;
+    uint8_t B = ((GPIOB->IDR) & (1 << 1)) != 0;
+
+    if(A!=tmpA){
+        tmpA=A;
+        cntA=0;
+    }else{
+        cntA++;
+        if(cntA>50){
+            valA=A;
+            cntA=0;
+        }
+    }
+
+    if(B!=tmpB){
+        tmpB=B;
+        cntB=0;
+    }else{
+        cntB++;
+        if(cntB>50){
+            valB=B;
+            cntB=0;
+        }
+    }
+
+    if(lastA != valA){
+        if(valA) encPos -= valA != valB ? 1 : -1;
+        lastA = valA;
+    }
+    if(lastB != valB){
+        if(valB) encPos -= valA != valB ? -1 : 1;
+        lastB = valB;
+    }
+}
+
+void resetAllKeys(void){
+    for (uint8_t i = 0; i < KEY_NUM; i++) 
+        *(uint16_t*)(&key[i])=0;
+}
+
+volatile int32_t encPos;
+
+void EXTI0_1_IRQHandler(void) {
     uint8_t A = ((GPIOB->IDR) & (1 << 0)) != 0;
     uint8_t B = ((GPIOB->IDR) & (1 << 1)) != 0;
     if (EXTI->PR & EXTI_PR_PR0) {
         EXTI->PR = EXTI_PR_PR0;
+        #ifdef ENC_INVERT
+        encPos -= A != B ? 1 : -1;
+        #else
         encPos += A != B ? 1 : -1;
+        #endif
     }
 }
 
@@ -56,7 +105,7 @@ void keyBklSet(uint8_t key, uint8_t state) {
         (keyBklStat&(~(0b11<<(key*2))))|((state&0b11)<<(key*2));
 }
 
-void keyBklProc(){
+void keyBklProc(void){
     uint16_t d=0;
     for(uint8_t i=0; i<16; i++){ 
         uint8_t m = keyBklStat>>i*2&0b11;
