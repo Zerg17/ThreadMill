@@ -9,6 +9,15 @@
 #define IS_PRESSED_CLICK 10
 #define IS_LONG_PRESSED_CLICK 250
 
+#define KNOB_KEY                       0
+#define TOP_LEFT_KEY                   7
+#define TOP_MIDDLE_KEY                 6
+#define TOP_RIGHT_KEY                  5
+#define BOT_LEFT_KEY                   9
+#define BOT_MIDDLE_KEY                 10
+#define BOT_RIGHT_KEY                  11
+#define SAVE_TO_EEPROM_KEY             1
+
 #define BKL1 15
 #define BKL2 14
 #define BKL3 13

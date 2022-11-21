@@ -87,7 +87,7 @@ void tim17pwm(uint16_t p, uint16_t a) {
 }
 
 void tim14Init() {
-    TIM14->ARR = F_CPU/10000-1;
+    TIM14->ARR = F_CPU/1000-1;
     TIM14->CR1 |= TIM_CR1_CEN;
     TIM14->DIER |= TIM_DIER_UIE;
 }

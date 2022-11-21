@@ -2,8 +2,10 @@
 #include "modbus.h"
 #include "sysControl.h"
 #include "system.h"
+#include "key.h"
+#include "menu.h"
 
-#define PRE_TAP_TORQUE_LIMIT            40 //Ограничение крутящего момента до нарезания резьбы
+#define PRE_TAP_TORQUE_LIMIT            50 //Ограничение крутящего момента до нарезания резьбы
 
 static inline int32_t constrain(int32_t v,int32_t min,int32_t max){
     return (v < min) ? min : ((v > max) ? max : v);
@@ -119,9 +121,8 @@ int8_t servoReadRegs(uint16_t startAdr, uint8_t numRegs, uint16_t* dst){
 
 int32_t getServoPos(void){
     uint16_t regs[2];
-    int8_t err = servoReadRegs(0x1BC, 2, regs);
-    if(err) return 0;
-    else return regs[0] | (regs[1] << 16);
+    while(servoReadRegs(0x1BC, 2, regs));
+    return regs[0] | (regs[1] << 16);
 }
 
 void setSpeedCommandType(uint8_t v){
@@ -133,7 +134,8 @@ void setExtIO(uint8_t v){
 }
 
 void setSimDI(uint8_t v){
-    xprintf("setSimDI(%08b)=%d\n", v, servoWriteReg(0x1A4, v));
+    // xprintf("setSimDI(%08b)=%d\n", v, servoWriteReg(0x1A4, v));
+    servoWriteReg(0x1A4, v);
 }
 
 uint16_t getSimDO(void){
@@ -168,15 +170,15 @@ void setCommSendPulse(uint8_t v){
 
 void setTorqueLimit(uint16_t t){
     if(t>3000) t=3000;
-    servoWriteReg(0x5e, t);
+    while(servoWriteReg(0x5e, t));
 }
 
 void setSpeed(int16_t s){
     if(s<-3000)s=-3000;
     if(s>3000)s=3000;
     // servoWriteReg(0x53, s);
-    servoWriteReg(0x092, 0);
-    servoWriteReg(0x140, s);
+    while(servoWriteReg(0x092, 0));
+    while(servoWriteReg(0x140, s));
 }
 
 int8_t setTargetPos(int32_t p){    
@@ -219,10 +221,9 @@ typedef struct _servoState {
 } servoState_t;
 */
 
-
 servoState_t servoState;
 int8_t servoStateMachineHandler(servoState_t* servoState){
-    xprintf("state=%u\n", servoState->state);
+    // xprintf("state=%u\n", servoState->state);
     switch(servoState->state){
         case 1:                        //Подготовка
             //Записать настройки скорости и крутящего момента в регистры контроллера
@@ -230,60 +231,82 @@ int8_t servoStateMachineHandler(servoState_t* servoState){
             setTorqueLimit(PRE_TAP_TORQUE_LIMIT);
             setSimDI(0b00000101); // Сервопривод активен, режим Speed
             servoState->state = 2;   //Ожидать касания
+            keyBklSet(SAVE_TO_EEPROM_KEY,3);
             break;
         case 2:                        //Холостой ход, ожидать начала нарезки
+        #ifndef NO_PRE_TAP
             if((getSimDO() & (0xFF20)) == 0x20){ //Если превышен момент (0b00100000 == 0x20), перейти к нарезке резьбы
+        #else
+                setSimDI(0b00000101); // Сервопривод активен, режим Speed
+        #endif
                 setSpeed(0);
-                setPosSpeed(servoState->speed);
+                setTorqueLimit(servoState->torque);
                 servoState->initialPos = getServoPos();
-                servoState->targetPos+=servoState->initialPos;
-                while(setTargetPos(servoState->targetPos));
+                servoState->finalPos+=servoState->initialPos;
+                servoState->targetPos=servoState->finalPos; //Вкрутиться на всю глубину
+                setSpeed(servoState->speed);
+                // while(setTargetPos(servoState->targetPos));
                 servoState->state = 3;  //Перейти к нарезке
+                keyBklSet(SAVE_TO_EEPROM_KEY,2);
+        #ifndef NO_PRE_TAP
             }
+        #endif
             break;
         case 3:                       //Ожидать превышение крутящего момента или глубины
-            if((getSimDO() & (0xFF20)) == 0x20){ //Если превышен момент (0b00100000 == 0x20), делаем реверс
-                uint32_t posBuf = constrain(getServoPos()-REVERSE_ANGLE,servoState->initialPos,servoState->targetPos);
-                while(setTargetPos(posBuf));  //Загружаем рассчитанное положение, до которого нужно выкрутиться
-                servoState->state=4;   //Ждем окончания выкручивания
-            }
-            else if(abs(getServoPos() - servoState->targetPos) < 10){   //Если достигнута глубина
-                while(setTargetPos(servoState->initialPos-REVERSE_ANGLE)); //Выкрутиться на всю глубину + запас REVERSE_ANGLE
+            if(getServoPos() > servoState->targetPos){   //Если достигнута глубина
+                setSpeed(0);
+                servoState->targetPos=servoState->initialPos-REVERSE_ANGLE; //Выкрутиться на всю глубину + запас REVERSE_ANGLE
+                setSpeed(-servoState->speed);
                 servoState->state=5;   //Перейти к выкручиванию метчика
+            }
+            else if((getSimDO() & (0xFF20)) == 0x20){ //Если превышен момент (0b00100000 == 0x20), делаем реверс
+                setSpeed(0);
+                servoState->targetPos=getServoPos() - REVERSE_ANGLE; //Выкрутиться на REVERSE_ANGLE
+                setSpeed(-servoState->speed);
+                servoState->state=4;   //Ждем окончания выкручивания
             }
             break;
         case 4:{                       //Возврат обратно к нарезке резьбы
-            uint16_t DOBuf = getSimDO();
-            //(DOBuf&(1<<5)) || 
-            if((DOBuf != 0xFFFF) && ((DOBuf&(1<<2)))){ //Если достигнута глубина или превышен момент (0b00100100 == 0x24)
-                while(setTargetPos(servoState->targetPos));
+            int32_t cur = getServoPos();
+            xprintf("cur: %d, tar: %d\n",cur,servoState->targetPos);
+            if(((getSimDO() & (0xFF20)) == 0x20) || (cur < servoState->targetPos)){ //Если достигнута глубина или превышен момент (0b00100100 == 0x24)
+                setSpeed(0);
+                servoState->targetPos=servoState->finalPos; //Вкрутиться на всю глубину
+                setSpeed(servoState->speed);
                 servoState->state = 3;  //Продолжаем нарезку
             }
             break;
         }
         case 5:                       //Ожидать превышение крутящего момента или полного выкручивания
-            if((getSimDO() & (0xFF20)) == 0x20){ //Если превышен момент (0b00100000 == 0x20), делаем реверс
-                uint32_t posBuf = constrain(getServoPos()+REVERSE_ANGLE,servoState->initialPos,servoState->targetPos);
-                while(setTargetPos(posBuf));  //Загружаем рассчитанное положение, до которого нужно вкрутиться
-                servoState->state=6;   //Ждем окончания реверса
+            if(getServoPos() < servoState->targetPos){   //Если Выкрутились
+                setSpeed(0);
+                servoState->state=0;   //Завершаем
+                setSimDI(0b00000000); //Сервопривод не активен
             }
-            else if(abs(getServoPos() - (servoState->initialPos - REVERSE_ANGLE)) < 10){//Если Выкрутились
-                setSimDI(0b00000000); //Сервопривод не активен, режим Pos
-                servoState->state=0;   //Окончание
+            else if((getSimDO() & (0xFF20)) == 0x20){ //Если превышен момент (0b00100000 == 0x20), делаем реверс
+                setSpeed(0);
+                servoState->targetPos=getServoPos() + REVERSE_ANGLE; //Выкрутиться на REVERSE_ANGLE
+                setSpeed(servoState->speed);
+                servoState->state=6;   //Ждем окончания выкручивания
             }
             break;
         case 6:{                       //Возврат обратно к выкручиванию
-            uint16_t DOBuf = getSimDO();
             //(DOBuf&(1<<5)) || 
-            if((DOBuf != 0xFFFF) && ((DOBuf&(1<<2)))){ //Если достигнута глубина или превышен момент (0b00100100 == 0x24)
-                while(setTargetPos(servoState->initialPos - REVERSE_ANGLE));
+            if(((getSimDO() & (0xFF20)) == 0x20) || (getServoPos() > servoState->targetPos)){ //Если достигнута глубина или превышен момент (0b00100100 == 0x24)
+                setSpeed(0);
+                servoState->targetPos=servoState->initialPos-REVERSE_ANGLE; //Выкрутиться на всю глубину + запас REVERSE_ANGLE
+                setSpeed(-servoState->speed);
                 servoState->state = 5;  //Продолжаем выкручивание
             }
             break;
         }
-        default:                       
-            // setSimDI(0b00000000); //Сервопривод не активен, режим Pos
+        default:
+            setSimDI(0b00000000); //Сервопривод не активен
+            keyBklSet(SAVE_TO_EEPROM_KEY,0);
             break;
-    }    
+    }
     return 0;
 }
+
+// Ищет точку входа переходит на 2
+// 

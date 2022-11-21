@@ -7,12 +7,15 @@
 // #define REVERSE_ANGLE                  835  //~30 градусов, 360 градусов = 10000 попугаев
 #define REVERSE_ANGLE                  5000  //180 градусов, 360 градусов = 10000 попугаев
 
+// #define NO_PRE_TAP
+
 typedef struct _servoState {
     uint8_t state;
     int16_t speed;
-    int16_t torque;
+    uint16_t torque;
     int32_t initialPos;
     int32_t targetPos;
+    int32_t finalPos;
 } servoState_t;
 
 typedef enum servoStatus_e{

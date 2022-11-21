@@ -9,15 +9,6 @@
 
 // #define RUS_MENU
 
-#define KNOB_KEY                       0
-#define TOP_LEFT_KEY                   10
-#define TOP_MIDDLE_KEY                 6
-#define TOP_RIGHT_KEY                  5
-#define BOT_LEFT_KEY                   9
-#define BOT_MIDDLE_KEY                 9
-#define BOT_RIGHT_KEY                  8
-#define SAVE_TO_EEPROM_KEY             11
-
 static const uint8_t menuKeysMap[] ={
     KNOB_KEY,
     TOP_LEFT_KEY,
@@ -65,7 +56,7 @@ void logoMenu(){
         xfprintf(lcdChar, "====================");  // 4th string
         #endif
     }
-    if(tick>200)nextMenu(mainMenu);
+    if(tick>500)nextMenu(mainMenu);
 }
  ///@todo   reset selection by pressing same button again
 
@@ -89,41 +80,43 @@ void mainMenu() {
         firstExec = 0;
         lcdSetPos(0, 0);
         #ifdef RUS_MENU
-            xfprintf(lcdChar, " Диаметр        Шаг ");  // 1st string
+            xfprintf(lcdChar, " Момент         Шаг ");  // 1st string
             xfprintf(lcdChar, " Обороты    Глубина ");  // 3rd string
-            if(currentProfile.thread%10)
-                xsprintf(buf1,"M%1d.%1d",currentProfile.thread/10,currentProfile.thread%10);
-            else
-                xsprintf(buf1,"M%-3d",currentProfile.thread/10);
-            xfprintf(lcdChar, " %s       %2d.%02dмм ",buf1,currentProfile.pitch/100,currentProfile.pitch%100);  // 2nd string
+            // if(currentProfile.thread%10)
+            //     xsprintf(buf1,"M%1d.%1d",currentProfile.thread/10,currentProfile.thread%10);
+            // else
+            //     xsprintf(buf1,"M%-3d",currentProfile.thread/10);
+            // xfprintf(lcdChar, " %s       %2d.%02dмм ",buf1,currentProfile.pitch/100,currentProfile.pitch%100);  // 2nd string
+            xfprintf(lcdChar, " %5u      %2d.%02dмм ",currentProfile.torque,currentProfile.pitch/100,currentProfile.pitch%100);  // 2nd string
             xfprintf(lcdChar, " %3dоб/м    %2d.%d мм ",currentProfile.speed, currentProfile.depth/10, currentProfile.depth%10);  // 4rd string
         #else
-            xfprintf(lcdChar, " Dia          Pitch ");  // 1st string
+            xfprintf(lcdChar, " Torque       Pitch ");  // 1st string
             xfprintf(lcdChar, " RPM          Depth ");  // 3rd string
-            if(currentProfile.thread%10)
-                xsprintf(buf1,"M%1d.%1d",currentProfile.thread/10,currentProfile.thread%10);
-            else
-                xsprintf(buf1,"M%-3d",currentProfile.thread/10);
-            xfprintf(lcdChar, " %s       %2d.%02dmm ",buf1,currentProfile.pitch/100,currentProfile.pitch%100);  // 2nd string
+            // if(currentProfile.thread%10)
+            //     xsprintf(buf1,"M%1d.%1d",currentProfile.thread/10,currentProfile.thread%10);
+            // else
+            //     xsprintf(buf1,"M%-3d",currentProfile.thread/10);
+            // xfprintf(lcdChar, " %s       %2d.%02dmm ",buf1,currentProfile.pitch/100,currentProfile.pitch%100);  // 2nd string
+            xfprintf(lcdChar, " %5u      %2d.%02dmm ",currentProfile.torque,currentProfile.pitch/100,currentProfile.pitch%100);  // 2nd string
             xfprintf(lcdChar, " %3dRPM     %2d.%d mm ",currentProfile.speed, currentProfile.depth/10, currentProfile.depth%10);  // 4rd string
         #endif
     }
-    lcdSetPos(6, 0);
-    xfprintf(lcdChar, "%5d ", getServoPos());  // 1st string
+    // lcdSetPos(6, 0);
+    // xfprintf(lcdChar, "%5d ", getServoPos());  // 1st string
     switch (menuState.selectedSetting){
     case 1:
         if(encPos){
-            currentProfile.thread+=encPos*THREAD_STP;
+            currentProfile.torque+=encPos*TORQUE_STP;
             encPos=0;
-            if(currentProfile.thread<THREAD_MIN) currentProfile.thread = THREAD_MAX;
-            else if(currentProfile.thread >THREAD_MAX) currentProfile.thread=THREAD_MIN;
-            currentProfile.torque=50+currentProfile.thread;
-            if(currentProfile.thread%10)
-                xsprintf(buf1,"М%1d.%1d",currentProfile.thread/10,currentProfile.thread%10);
-            else
-                xsprintf(buf1,"M%-3d",currentProfile.thread/10);
+            if(currentProfile.torque<TORQUE_MIN) currentProfile.torque = TORQUE_MAX;
+            else if(currentProfile.torque >TORQUE_MAX) currentProfile.torque=TORQUE_MIN;
+            // if(currentProfile.thread%10)
+            //     xsprintf(buf1,"М%1d.%1d",currentProfile.thread/10,currentProfile.thread%10);
+            // else
+            //     xsprintf(buf1,"M%-3d",currentProfile.thread/10);
             lcdSetPos(1, 1);
-            xfprintf(lcdChar, "%s",buf1);
+            xfprintf(lcdChar, "%5u",currentProfile.torque);  // 2nd string
+            // xprintf("torque: %u\n",currentProfile.torque);  // 2nd string
         }
         break;
     case 3:
@@ -185,6 +178,7 @@ void mainMenu() {
         if(key[menuKeysMap[i]].isClick){
             key[menuKeysMap[i]].isClick = 0;
             encPos=0;   // Костыль от страшных вещей
+            keyBklSet(menuKeysMap[menuState.selectedSetting],0);
             switch (menuState.selectedSetting){
             case 1:
                 unwrapMenuSetting(0, 1);
@@ -205,7 +199,7 @@ void mainMenu() {
                 break;
             }
             menuState.selectedSetting = i;
-
+            keyBklSet(menuKeysMap[menuState.selectedSetting],1);
             switch (menuState.selectedSetting){
             case 1:
                 wrapMenuSetting(0, 1);
@@ -227,12 +221,19 @@ void mainMenu() {
     if(key[SAVE_TO_EEPROM_KEY].isClick){
         // saveProfile();
         // xprintf("Start Mill\n");
+        keyBklSet(menuKeysMap[menuState.selectedSetting],0);
+        menuState.selectedSetting = 0;
         servoState.speed = currentProfile.speed;
         servoState.torque = currentProfile.torque;
-        servoState.targetPos = (((uint32_t)currentProfile.depth*10000) / currentProfile.thread);
+        servoState.finalPos= (((uint32_t)currentProfile.depth*10000) / currentProfile.thread);
+        #ifdef NO_PRE_TAP
+        servoState.state = 2;
+        #else
         servoState.state = 1;
+        #endif
         nextMenu(tapMenu);
         key[SAVE_TO_EEPROM_KEY].isClick = 0;
+        keyBklSet(SAVE_TO_EEPROM_KEY,2);
     }
 }
 
@@ -265,7 +266,7 @@ void tapMenu(){
         servoState.state = 0;
         key[SAVE_TO_EEPROM_KEY].isClick = 0;
     }
-    if(!servoState.state)nextMenu(mainMenu);
+    if(!servoState.state) nextMenu(mainMenu);
 }
 
 /*
