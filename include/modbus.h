@@ -98,7 +98,7 @@ typedef struct {
 
 extern mbRX_t mbRX;
 
-/// @brief Инициализация периферии(USART1, DMA) для MODBUS 
+/// @brief Инициализация периферии(USART1, DMA) для MODBUS
 void mbInit(void);
 
 /// @brief Передача данных через USART1 с помощью DMA, CRC16 рассчитывается и добавляется в конец

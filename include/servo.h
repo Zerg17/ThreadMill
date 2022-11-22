@@ -30,7 +30,7 @@ typedef enum servoStatus_e{
     SERVO_STATUS_EX_COIN,               // Full closed loop position arrival
     SERVO_STATUS_OVERLOAD_O,            // Overload warning
     SERVO_STATUS_BRAKE_ON,              // Brake pipe conduction state
-    SERVO_STATUS_ORG_FOUND,             // Origin has been found 
+    SERVO_STATUS_ORG_FOUND,             // Origin has been found
     SERVO_STATUS_BRAKE_ON_ERR_O=14,     // Brake error message
     SERVO_STATUS_EEPROM_STATE_O,        // EEPROm completion status
     SERVO_STATUS_JOG_RUN,               // JOG run
@@ -107,8 +107,8 @@ void setSpeedCommandType(uint8_t v);
 /// @return Положение шпинделя
 int32_t getServoPos();
 
-/// @brief 
-/// @param v 
+/// @brief
+/// @param v
 void setExtIO(uint8_t v);
 
 /// @brief Установить значение виртуального регистра ввода
@@ -121,13 +121,13 @@ void setSimDI(uint8_t v);
 /// @return значение регистра вывода или 0xFFFF при ошибке чтения
 uint16_t getSimDO();
 
-/// @brief 
+/// @brief
 /// 0x90
-/// @param m 
+/// @param m
 void setStandardExtendedMode(uint8_t m);
 
-/// @brief 
-/// @param v 
+/// @brief
+/// @param v
 void setCommSendPulse(uint8_t v);
 
 /// @brief Установить положение, к которому нужно приехать
@@ -136,14 +136,14 @@ void setCommSendPulse(uint8_t v);
 /// @return Результат выполнения операции - 0 успешно
 int8_t setTargetPos(int32_t p);
 
-/// @brief Установить скорость вращения 
+/// @brief Установить скорость вращения
 /// (0x140)
 /// @param s Скорость (-3000..3000)
 void setSpeed(int16_t s);
 
-/// @brief Установить ограничение крутящего момента 
+/// @brief Установить ограничение крутящего момента
 /// (0x5e)
-/// @param t Крутящий момент (0..3000) 
+/// @param t Крутящий момент (0..3000)
 void setTorqueLimit(uint16_t t);
 
 /// @brief Настройка функции входного пина
@@ -152,7 +152,7 @@ void setTorqueLimit(uint16_t t);
 /// @param conf Режим пина (0..21)
 void setDIConfig(uint8_t d, DI_configuration_t conf);
 
-/// @brief Настройка функции выходного пина 
+/// @brief Настройка функции выходного пина
 /// (0x88+d)
 /// @param d Номер пина (0..8)
 /// @param conf Режим пина (0..17)
@@ -160,13 +160,13 @@ void setDOConfig(uint8_t d, servoStatus_t conf);
 
 /// @brief Установить абсолютный или относительный режим управления положением
 /// 0x94
-/// @param v 
+/// @param v
 /// 0 Абсолютный
 /// 1 Относительный
 void setPositionControlMode(uint8_t v);
 
 /// @brief 0x2
-/// @param v 
+/// @param v
 void setControlMode(uint8_t v);
 
 /// @brief 0x1D0

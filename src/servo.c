@@ -126,7 +126,7 @@ int32_t getServoPos(void){
 }
 
 void setSpeedCommandType(uint8_t v){
-    servoWriteReg(0x05, v); 
+    servoWriteReg(0x05, v);
 }
 
 void setExtIO(uint8_t v){
@@ -181,7 +181,7 @@ void setSpeed(int16_t s){
     while(servoWriteReg(0x140, s));
 }
 
-int8_t setTargetPos(int32_t p){    
+int8_t setTargetPos(int32_t p){
     servoWriteReg(0x091,0);
     int8_t err=servoWriteReg32(0x168, p);
     xprintf("setTargetPos(%ld)=%d\n", p, err);
@@ -291,7 +291,7 @@ int8_t servoStateMachineHandler(servoState_t* servoState){
             }
             break;
         case 6:{                       //Возврат обратно к выкручиванию
-            //(DOBuf&(1<<5)) || 
+            //(DOBuf&(1<<5)) ||
             if(((getSimDO() & (0xFF20)) == 0x20) || (getServoPos() > servoState->targetPos)){ //Если достигнута глубина или превышен момент (0b00100100 == 0x24)
                 setSpeed(0);
                 servoState->targetPos=servoState->initialPos-REVERSE_ANGLE; //Выкрутиться на всю глубину + запас REVERSE_ANGLE
@@ -309,4 +309,4 @@ int8_t servoStateMachineHandler(servoState_t* servoState){
 }
 
 // Ищет точку входа переходит на 2
-// 
+//

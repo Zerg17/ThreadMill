@@ -28,9 +28,9 @@
 #define DEPTH_STP 5
 
 typedef struct {
-    uint16_t thread; // стандарт резьбы, Типа М1.6 М2 М3 и т.п.  fixed point divided by 10 
+    uint16_t thread; // стандарт резьбы, Типа М1.6 М2 М3 и т.п.  fixed point divided by 10
     uint16_t torque; //fixed point
-    int16_t speed;   
+    int16_t speed;
     uint16_t pitch;  //fixed point divided by 100
     uint16_t depth;  //fixed point divided by 10
 } tap_profile;

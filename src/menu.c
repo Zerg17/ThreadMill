@@ -165,11 +165,11 @@ void mainMenu() {
 
     for(uint8_t i = 0; i<sizeof(menuKeysMap)-1; i++){
         // if((i==2) || (i==5)) {
-        //     if(key[TOP_MIDDLE_KEY].isClick){ 
+        //     if(key[TOP_MIDDLE_KEY].isClick){
         //         encPos++;
         //         key[TOP_MIDDLE_KEY].isClick = 0;
         //     }
-        //     else if(key[BOT_MIDDLE_KEY].isClick){ 
+        //     else if(key[BOT_MIDDLE_KEY].isClick){
         //         encPos--;
         //         key[BOT_MIDDLE_KEY].isClick = 0;
         //     }
@@ -194,7 +194,7 @@ void mainMenu() {
                 break;
             }
 
-            if(menuState.selectedSetting == i){ 
+            if(menuState.selectedSetting == i){
                 menuState.selectedSetting = 0;
                 break;
             }
@@ -261,7 +261,7 @@ void tapMenu(){
     xfprintf(lcdChar, "%-10d", servoState.targetPos);    // 3rd string
     lcdSetPos(9,3);
     xfprintf(lcdChar, "%-10d", servoState.initialPos);    // 4th string
-    
+
     if(key[SAVE_TO_EEPROM_KEY].isClick){
         servoState.state = 0;
         key[SAVE_TO_EEPROM_KEY].isClick = 0;
