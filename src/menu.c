@@ -225,7 +225,7 @@ void mainMenu() {
         menuState.selectedSetting = 0;
         servoState.speed = currentProfile.speed;
         servoState.torque = currentProfile.torque;
-        servoState.finalPos= (((uint32_t)currentProfile.depth*10000) / currentProfile.thread);
+        servoState.finalPos= (((uint32_t)currentProfile.depth*10000) / currentProfile.pitch)*10;
         #ifdef NO_PRE_TAP
         servoState.state = 2;
         #else
