@@ -242,6 +242,7 @@ int8_t servoStateMachineHandler(servoState_t* servoState){
                 setSpeed(0);
                 setTorqueLimit(servoState->torque);
                 servoState->initialPos = getServoPos();
+                //TODO Добавить дополнительную переменную для хранения относительной целевой позиции
                 servoState->finalPos+=servoState->initialPos;
                 servoState->targetPos=servoState->finalPos; //Вкрутиться на всю глубину
                 setSpeed(servoState->speed);
@@ -255,7 +256,7 @@ int8_t servoStateMachineHandler(servoState_t* servoState){
         case 3:                       //Ожидать превышение крутящего момента или глубины
             if(getServoPos() > servoState->targetPos){   //Если достигнута глубина
                 setSpeed(0);
-                servoState->targetPos=servoState->initialPos-REVERSE_ANGLE; //Выкрутиться на всю глубину + запас REVERSE_ANGLE
+                servoState->targetPos=servoState->initialPos-EXTRA_UNSCREW_ANGLE; //Выкрутиться на всю глубину + запас EXTRA_UNSCREW_ANGLE
                 setSpeed(-servoState->speed);
                 servoState->state=5;   //Перейти к выкручиванию метчика
             }
@@ -294,7 +295,7 @@ int8_t servoStateMachineHandler(servoState_t* servoState){
             //(DOBuf&(1<<5)) ||
             if(((getSimDO() & (0xFF20)) == 0x20) || (getServoPos() > servoState->targetPos)){ //Если достигнута глубина или превышен момент (0b00100100 == 0x24)
                 setSpeed(0);
-                servoState->targetPos=servoState->initialPos-REVERSE_ANGLE; //Выкрутиться на всю глубину + запас REVERSE_ANGLE
+                servoState->targetPos=servoState->initialPos-EXTRA_UNSCREW_ANGLE; //Выкрутиться на всю глубину + запас EXTRA_UNSCREW_ANGLE
                 setSpeed(-servoState->speed);
                 servoState->state = 5;  //Продолжаем выкручивание
             }

@@ -6,6 +6,7 @@
 
 // #define REVERSE_ANGLE                  835  //~30 градусов, 360 градусов = 10000 попугаев
 #define REVERSE_ANGLE                  5000  //180 градусов, 360 градусов = 10000 попугаев
+#define EXTRA_UNSCREW_ANGLE            10000 * 5  //5 * 360 градусов
 
 // #define NO_PRE_TAP
 
