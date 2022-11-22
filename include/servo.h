@@ -147,6 +147,11 @@ void setSpeed(int16_t s);
 /// @param t Крутящий момент (0..3000)
 void setTorqueLimit(uint16_t t);
 
+/// @brief Установить уровень срабатывания ошибки 16 (Excessive Load)
+/// (0x72)
+/// @param t Значение в промилле от максимального крутящего момента (0..3000)
+void setOverloadLevel(uint16_t t);
+
 /// @brief Настройка функции входного пина
 /// (0x80+d)
 /// @param d Номер пина (0..8)

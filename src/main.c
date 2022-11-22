@@ -42,6 +42,7 @@ int main(void) {
     setExtIO(0b11111111);
     servoWriteReg(0x190, 300);
     setTorqueLimit(50);
+    setOverloadLevel(3000);
 
     while (1) {
 

@@ -173,6 +173,11 @@ void setTorqueLimit(uint16_t t){
     while(servoWriteReg(0x5e, t));
 }
 
+void setOverloadLevel(uint16_t t){
+    if(t>3000) t=3000;
+    while(servoWriteReg(0x72, t));
+}
+
 void setSpeed(int16_t s){
     if(s<-3000)s=-3000;
     if(s>3000)s=3000;
