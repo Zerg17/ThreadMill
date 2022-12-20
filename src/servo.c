@@ -134,7 +134,6 @@ void setExtIO(uint8_t v){
 }
 
 void setSimDI(uint8_t v){
-    // xprintf("setSimDI(%08b)=%d\n", v, servoWriteReg(0x1A4, v));
     servoWriteReg(0x1A4, v);
 }
 
@@ -217,18 +216,8 @@ void servoSaveSettings(void){
     servoWriteReg(0x1A7,0x801);
 }
 
-/*
-typedef struct _servoState {
-    uint8_t state;
-    int16_t speed;
-    int16_t torque;
-    uint8_t isRunning : 1;
-} servoState_t;
-*/
-
 servoState_t servoState;
 int8_t servoStateMachineHandler(servoState_t* servoState){
-    // xprintf("state=%u\n", servoState->state);
     switch(servoState->state){
         case 1:                        //Подготовка
             //Записать настройки скорости и крутящего момента в регистры контроллера
@@ -251,7 +240,6 @@ int8_t servoStateMachineHandler(servoState_t* servoState){
                 servoState->finalPos+=servoState->initialPos;
                 servoState->targetPos=servoState->finalPos; //Вкрутиться на всю глубину
                 setSpeed(servoState->speed);
-                // while(setTargetPos(servoState->targetPos));
                 servoState->state = 3;  //Перейти к нарезке
                 keyBklSet(SAVE_TO_EEPROM_KEY,2);
         #ifndef NO_PRE_TAP
@@ -297,7 +285,6 @@ int8_t servoStateMachineHandler(servoState_t* servoState){
             }
             break;
         case 6:{                       //Возврат обратно к выкручиванию
-            //(DOBuf&(1<<5)) ||
             if(((getSimDO() & (0xFF20)) == 0x20) || (getServoPos() > servoState->targetPos)){ //Если достигнута глубина или превышен момент (0b00100100 == 0x24)
                 setSpeed(0);
                 servoState->targetPos=servoState->initialPos-EXTRA_UNSCREW_ANGLE; //Выкрутиться на всю глубину + запас EXTRA_UNSCREW_ANGLE
@@ -313,6 +300,3 @@ int8_t servoStateMachineHandler(servoState_t* servoState){
     }
     return 0;
 }
-
-// Ищет точку входа переходит на 2
-//

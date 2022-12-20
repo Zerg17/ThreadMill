@@ -39,8 +39,16 @@ void nextMenu(void (*nextFn) (void)){
     menuFn=nextFn;
 }
 
+/*
+┌────────────────────┐
+│  Dia         Pitch │
+│ M3          1.5 mm │
+│ 60 rpm     10.5 mm │
+│ Speed        Depth │
+└────────────────────┘
+*/
+
 void logoMenu(){
-    // xprintf("logoMenu\n");
     if(firstExec){
         firstExec = 0;
         lcdSetPos(0,0);
@@ -101,8 +109,6 @@ void mainMenu() {
             xfprintf(lcdChar, " %3dRPM     %2d.%d mm ",currentProfile.speed, currentProfile.depth/10, currentProfile.depth%10);  // 4rd string
         #endif
     }
-    // lcdSetPos(6, 0);
-    // xfprintf(lcdChar, "%5d ", getServoPos());  // 1st string
     switch (menuState.selectedSetting){
     case 1:
         if(encPos){
@@ -110,13 +116,8 @@ void mainMenu() {
             encPos=0;
             if(currentProfile.torque<TORQUE_MIN) currentProfile.torque = TORQUE_MAX;
             else if(currentProfile.torque >TORQUE_MAX) currentProfile.torque=TORQUE_MIN;
-            // if(currentProfile.thread%10)
-            //     xsprintf(buf1,"М%1d.%1d",currentProfile.thread/10,currentProfile.thread%10);
-            // else
-            //     xsprintf(buf1,"M%-3d",currentProfile.thread/10);
             lcdSetPos(1, 1);
             xfprintf(lcdChar, "%5u",currentProfile.torque);  // 2nd string
-            // xprintf("torque: %u\n",currentProfile.torque);  // 2nd string
         }
         break;
     case 3:
@@ -164,17 +165,6 @@ void mainMenu() {
     }
 
     for(uint8_t i = 0; i<sizeof(menuKeysMap)-1; i++){
-        // if((i==2) || (i==5)) {
-        //     if(key[TOP_MIDDLE_KEY].isClick){
-        //         encPos++;
-        //         key[TOP_MIDDLE_KEY].isClick = 0;
-        //     }
-        //     else if(key[BOT_MIDDLE_KEY].isClick){
-        //         encPos--;
-        //         key[BOT_MIDDLE_KEY].isClick = 0;
-        //     }
-        //     continue;
-        // }
         if(key[menuKeysMap[i]].isClick){
             key[menuKeysMap[i]].isClick = 0;
             encPos=0;   // Костыль от страшных вещей
@@ -217,10 +207,8 @@ void mainMenu() {
             break;
         }
     }
-    // xprintf("Polling keys... 11:%1d\n",key[SAVE_TO_EEPROM_KEY].isClick);
+
     if(key[SAVE_TO_EEPROM_KEY].isClick){
-        // saveProfile();
-        // xprintf("Start Mill\n");
         keyBklSet(menuKeysMap[menuState.selectedSetting],0);
         menuState.selectedSetting = 0;
         servoState.speed = currentProfile.speed;
@@ -268,31 +256,6 @@ void tapMenu(){
     }
     if(!servoState.state) nextMenu(mainMenu);
 }
-
-/*
-┌────────────────────┐
-│  Dia         Pitch │
-│ M3          1.5 mm │
-│ 60 rpm     10.5 mm │
-│ Speed        Depth │
-└────────────────────┘
-*/
-
-/*
-    xprintf("%d", 1234);                        "1234"
-    xprintf("%6d,%3d%%", -200, 5);      "  -200,  5%"
-    xprintf("%-6u", 100);                       "100   "
-    xprintf("%ld", 12345678);           "12345678"
-    xprintf("%llu", 0x100000000);       "4294967296"    <_USE_LONGLONG>
-    xprintf("%04x", 0xA3);                      "00a3"
-    xprintf("%08lX", 0x123ABC);         "00123ABC"
-    xprintf("%016b", 0x550F);           "0101010100001111"
-    xprintf("%s", "String");            "String"
-    xprintf("%-5s", "abc");                     "abc  "
-    xprintf("%5s", "abc");                      "  abc"
-    xprintf("%c", 'a');                         "a"
-    xprintf("%f", 10.0);            <xprintf lacks floating point support. Use regular printf.>
-*/
 
 void procMenu(void){
     menuFn();
